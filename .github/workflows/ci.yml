@@ -1,0 +1,29 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  windows:
+    name: Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x64]
+    env:
+      platform: ${{ matrix.platform }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Build
+      shell: cmd
+      run: |
+        call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat"
+        pushd libretro\libretro_msvc
+          msbuild libretro_msvc.sln /p:Configuration=Release
+        popd
+        md artefacts
+        copy libretro\libretro_msvc\%platform%\Release\genesis_plus_gx_libretro.dll artefacts
+    - name: Upload artefacts
+      uses: actions/upload-artifact@v1
+      with:
+        name: "win-${{ matrix.platform }}"
+        path: artefacts
