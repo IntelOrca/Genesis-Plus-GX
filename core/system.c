@@ -325,6 +325,21 @@ void system_reset(void)
   audio_reset();
 }
 
+typedef void(*m68k_debug_callback)(void *);
+
+void system_m68k_run(unsigned int cycles)
+{
+    while (m68k.cycles < cycles)
+    {
+        m68k_debug_callback callback = (m68k_debug_callback)config.ted_debug_m68k;
+        if (callback)
+        {
+            callback(&m68k);
+        }
+        m68k_run(m68k.cycles + 1);
+    }
+}
+
 void system_frame_gen(int do_skip)
 {
   /* line counters */
@@ -462,7 +477,7 @@ void system_frame_gen(int do_skip)
     v_counter = bitmap.viewport.h;
 
     /* delay between VBLANK flag & Vertical Interrupt (Dracula, OutRunners, VR Troopers) */
-    m68k_run(788);
+    system_m68k_run(788);
     if (zstate == 1)
     {
       z80_run(788);
@@ -484,7 +499,7 @@ void system_frame_gen(int do_skip)
   }
 
   /* run 68k & Z80 until end of line */
-  m68k_run(MCYCLES_PER_LINE);
+  system_m68k_run(MCYCLES_PER_LINE);
   if (zstate == 1)
   {
     z80_run(MCYCLES_PER_LINE);
@@ -525,7 +540,7 @@ void system_frame_gen(int do_skip)
     input_refresh();
 
     /* run 68k & Z80 until end of line */
-    m68k_run(mcycles_vdp + MCYCLES_PER_LINE);
+    system_m68k_run(mcycles_vdp + MCYCLES_PER_LINE);
     if (zstate == 1)
     {
       z80_run(mcycles_vdp + MCYCLES_PER_LINE);
@@ -573,7 +588,7 @@ void system_frame_gen(int do_skip)
   input_refresh();
 
   /* run 68k & Z80 until end of line */
-  m68k_run(mcycles_vdp + MCYCLES_PER_LINE);
+  system_m68k_run(mcycles_vdp + MCYCLES_PER_LINE);
   if (zstate == 1)
   {
     z80_run(mcycles_vdp + MCYCLES_PER_LINE);
@@ -633,7 +648,7 @@ void system_frame_gen(int do_skip)
     }
 
     /* run 68k & Z80 until end of line */
-    m68k_run(mcycles_vdp + MCYCLES_PER_LINE);
+    system_m68k_run(mcycles_vdp + MCYCLES_PER_LINE);
     if (zstate == 1)
     {
       z80_run(mcycles_vdp + MCYCLES_PER_LINE);
@@ -801,7 +816,7 @@ void system_frame_scd(int do_skip)
     v_counter = bitmap.viewport.h;
 
     /* delay between VBLANK flag & Vertical Interrupt (Dracula, OutRunners, VR Troopers) */
-    m68k_run(788);
+    system_m68k_run(788);
     if (zstate == 1)
     {
       z80_run(788);

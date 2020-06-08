@@ -129,6 +129,7 @@ typedef struct
   uint8 gun_cursor;
   uint32 overclock;
   uint8 no_sprite_limit;
+  void * ted_debug_m68k;
 } t_config;
 
 extern t_config config;

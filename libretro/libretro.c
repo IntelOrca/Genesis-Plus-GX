@@ -1414,6 +1414,12 @@ static void check_variables(void)
       config.no_sprite_limit = 1;
   }
 
+  var.key = "ted_debug_m68k";
+  environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var);
+  {
+    config.ted_debug_m68k = (void*)var.value;
+  }
+
   if (reinit)
   {
 #ifdef HAVE_OVERCLOCK
@@ -2683,6 +2689,8 @@ void *retro_get_memory_data(unsigned id)
          return sram.on ? sram.sram : NULL;
       case RETRO_MEMORY_SYSTEM_RAM:
          return work_ram;
+      case 256:
+         return cart.rom;
       default:
          return NULL;
    }
@@ -2723,6 +2731,8 @@ size_t retro_get_memory_size(unsigned id)
             return 0x02000;
          else
             return 0x10000;
+      case 256:
+         return cart.romsize;
       default:
          return 0;
    }
